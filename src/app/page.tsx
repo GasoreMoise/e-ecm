@@ -15,7 +15,7 @@ export default function Home() {
             alt="Person wearing stylish eyewear" 
             fill
             priority
-            className="object-cover object-center brightness-110 contrast-100"
+            className="object-cover object-center brightness-150 contrast-100"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-gray-900/70 to-gray-900"></div>
         </section>
