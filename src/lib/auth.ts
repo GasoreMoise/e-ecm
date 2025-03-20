@@ -1,6 +1,7 @@
 import { jwtVerify, SignJWT } from 'jose'
 import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
+import { ResponseCookies } from 'next/dist/server/web/spec-extension/cookies'
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
@@ -22,7 +23,8 @@ export async function decrypt(token: string) {
 }
 
 export async function login(token: string) {
-  const cookieStore = await cookies()
+  const cookieStore = (await cookies()) as ResponseCookies
+  cookieStore.delete('token') // Clear any existing token
   cookieStore.set('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',

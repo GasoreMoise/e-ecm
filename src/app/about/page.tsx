@@ -46,7 +46,7 @@ export default function About() {
         <section className="pt-32 pb-16 px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-              About Optical Eyewear
+              About E-ECM
             </h1>
             <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto">
               Revolutionizing the optical industry through innovative B2B solutions
