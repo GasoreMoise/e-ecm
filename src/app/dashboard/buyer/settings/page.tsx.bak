@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, Fragment, useCallback, useMemo } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -139,39 +139,6 @@ const navigation = [
   { name: 'Settings', href: '/dashboard/buyer/settings', icon: Cog6ToothIcon },
 ]
 
-// Theme options
-const themeOptions = [
-  { id: 'light', name: 'Light', icon: SunIcon, description: 'Light mode for daytime use' },
-  { id: 'dark', name: 'Dark', icon: MoonIcon, description: 'Dark mode for nighttime use' },
-  { id: 'system', name: 'System', icon: ComputerDesktopIcon, description: 'Follow system preferences' }
-];
-
-// Language options
-const languageOptions = [
-  { id: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
-  { id: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
-  { id: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
-  { id: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
-  { id: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' }
-];
-
-// Currency options
-const currencyOptions = [
-  { id: 'USD', name: 'US Dollar', symbol: '$' },
-  { id: 'EUR', name: 'Euro', symbol: '€' },
-  { id: 'GBP', name: 'British Pound', symbol: '£' },
-  { id: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
-  { id: 'AUD', name: 'Australian Dollar', symbol: 'A$' }
-];
-
-// Timezone options
-const timeZoneOptions = [
-  { id: 'UTC', name: 'Coordinated Universal Time', offset: 'UTC+0:00' },
-  { id: 'EST', name: 'Eastern Standard Time', offset: 'UTC-5:00' },
-  { id: 'PST', name: 'Pacific Standard Time', offset: 'UTC-8:00' },
-  { id: 'CET', name: 'Central European Time', offset: 'UTC+1:00' }
-];
-
 export default function SettingsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const router = useRouter()
@@ -260,14 +227,38 @@ export default function SettingsPage() {
   ])
 
   // Theme options
-  const [selectedTheme, setSelectedTheme] = useState(themeOptions[0])
-  const [selectedLanguage, setSelectedLanguage] = useState(languageOptions[0])
-  const [selectedCurrency, setSelectedCurrency] = useState(currencyOptions[0])
-  const [selectedTimeZone, setSelectedTimeZone] = useState(timeZoneOptions[0])
-  const [dateFormat, setDateFormat] = useState('MM/DD/YYYY')
-  const [reducedMotion, setReducedMotion] = useState(false)
-  const [highContrast, setHighContrast] = useState(false)
-
+  const themeOptions: ThemeOption[] = [
+    { id: 'light', name: 'Light', icon: SunIcon, description: 'Light mode for daytime use' },
+    { id: 'dark', name: 'Dark', icon: MoonIcon, description: 'Dark mode for nighttime use' },
+    { id: 'system', name: 'System', icon: ComputerDesktopIcon, description: 'Follow system preferences' }
+  ]
+  
+  // Language options
+  const languageOptions: LanguageOption[] = [
+    { id: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
+    { id: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
+    { id: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+    { id: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
+    { id: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' }
+  ]
+  
+  // Currency options
+  const currencyOptions: CurrencyOption[] = [
+    { id: 'USD', name: 'US Dollar', symbol: '$' },
+    { id: 'EUR', name: 'Euro', symbol: '€' },
+    { id: 'GBP', name: 'British Pound', symbol: '£' },
+    { id: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
+    { id: 'AUD', name: 'Australian Dollar', symbol: 'A$' }
+  ]
+  
+  // Timezone options
+  const timeZoneOptions: TimeZoneOption[] = [
+    { id: 'UTC', name: 'Coordinated Universal Time', offset: 'UTC+0:00' },
+    { id: 'EST', name: 'Eastern Standard Time', offset: 'UTC-5:00' },
+    { id: 'PST', name: 'Pacific Standard Time', offset: 'UTC-8:00' },
+    { id: 'CET', name: 'Central European Time', offset: 'UTC+1:00' }
+  ]
+  
   // Notification settings with categories
   const [notifications, setNotifications] = useState<NotificationSetting[]>([
     {
@@ -363,6 +354,15 @@ export default function SettingsPage() {
       enabled: true
     }
   ])
+
+  // Preferences
+  const [selectedTheme, setSelectedTheme] = useState(themeOptions[0])
+  const [selectedLanguage, setSelectedLanguage] = useState(languageOptions[0])
+  const [selectedCurrency, setSelectedCurrency] = useState(currencyOptions[0])
+  const [selectedTimeZone, setSelectedTimeZone] = useState(timeZoneOptions[0])
+  const [dateFormat, setDateFormat] = useState('MM/DD/YYYY')
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const [highContrast, setHighContrast] = useState(false)
 
   // Usage Stats (mock data)
   const [usageStats, setUsageStats] = useState({
@@ -499,7 +499,7 @@ export default function SettingsPage() {
     return () => {
       console.log('Settings component unmounted');
     };
-  }, [router])
+  }, [router, themeOptions, languageOptions])
 
   // Evaluate password strength
   const evaluatePasswordStrength = (password: string) => {
@@ -707,17 +707,17 @@ export default function SettingsPage() {
   };
   
   // Toggle notification settings
-  const toggleNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.map(notification =>
+  const toggleNotification = (id: string) => {
+    setNotifications(notifications.map(notification =>
       notification.id === id
         ? { ...notification, enabled: !notification.enabled }
         : notification
     ));
-  }, []);
+  };
   
   // Toggle notification channel
-  const toggleNotificationChannel = useCallback((id: string, channel: 'email' | 'push' | 'sms') => {
-    setNotifications(prev => prev.map(notification =>
+  const toggleNotificationChannel = (id: string, channel: 'email' | 'push' | 'sms') => {
+    setNotifications(notifications.map(notification =>
       notification.id === id && notification.channels
         ? { 
             ...notification, 
@@ -728,10 +728,10 @@ export default function SettingsPage() {
           }
         : notification
     ));
-  }, []);
+  };
 
   // Toggle security settings
-  const toggleSecurity = useCallback((id: string) => {
+  const toggleSecurity = (id: string) => {
     const setting = securitySettings.find(s => s.id === id);
     
     if (setting?.requiresVerification) {
@@ -739,7 +739,7 @@ export default function SettingsPage() {
         `Enable ${setting.title}?`,
         `You will need to verify your identity to enable this feature.`,
         () => {
-          setSecuritySettings(prev => prev.map(setting =>
+          setSecuritySettings(securitySettings.map(setting =>
             setting.id === id
               ? { ...setting, enabled: !setting.enabled }
               : setting
@@ -747,69 +747,33 @@ export default function SettingsPage() {
         }
       );
     } else {
-      setSecuritySettings(prev => prev.map(setting =>
+      setSecuritySettings(securitySettings.map(setting =>
         setting.id === id
           ? { ...setting, enabled: !setting.enabled }
           : setting
       ));
     }
-  }, [securitySettings, openConfirmDialog]);
+  };
   
   // Handle theme change
-  const handleThemeChange = useCallback((theme: ThemeOption) => {
+  const handleThemeChange = (theme: ThemeOption) => {
     setSelectedTheme(theme);
     setIsDarkMode(theme.id === 'dark');
     localStorage.setItem('theme', theme.id);
-  }, []);
+  };
   
   // Handle language change
-  const handleLanguageChange = useCallback((language: LanguageOption) => {
+  const handleLanguageChange = (language: LanguageOption) => {
     setSelectedLanguage(language);
     localStorage.setItem('language', language.id);
-  }, []);
+  };
   
   // Handle reduced motion toggle
-  const handleReducedMotionToggle = useCallback((enabled: boolean) => {
+  const handleReducedMotionToggle = (enabled: boolean) => {
     setReducedMotion(enabled);
     setAnimationEnabled(!enabled);
     localStorage.setItem('reducedMotion', enabled.toString());
-  }, []);
-  
-  // Save all preferences function
-  const savePreferences = useCallback(() => {
-    // Save theme preference
-    localStorage.setItem('theme', selectedTheme.id);
-    document.documentElement.classList.toggle('dark', selectedTheme.id === 'dark');
-    
-    // Save language preference
-    localStorage.setItem('language', selectedLanguage.id);
-    
-    // Save date format preference
-    localStorage.setItem('dateFormat', dateFormat);
-    
-    // Save currency preference
-    localStorage.setItem('currency', selectedCurrency.id);
-    
-    // Save timezone preference
-    localStorage.setItem('timezone', selectedTimeZone.id);
-    
-    // Save reduced motion preference
-    localStorage.setItem('reducedMotion', reducedMotion.toString());
-    
-    // Save high contrast preference
-    localStorage.setItem('highContrast', highContrast.toString());
-    document.documentElement.classList.toggle('high-contrast', highContrast);
-    
-    // Show success message
-    showSuccessMessage("Preferences saved successfully!");
-    
-    // Apply theme to body element if needed
-    if (selectedTheme.id === 'dark') {
-      document.body.classList.add('dark');
-    } else {
-      document.body.classList.remove('dark');
-    }
-  }, [selectedTheme, selectedLanguage, dateFormat, selectedCurrency, selectedTimeZone, reducedMotion, highContrast, showSuccessMessage]);
+  };
   
   // Handle logout
   const handleLogout = async () => {
@@ -1906,460 +1870,7 @@ export default function SettingsPage() {
                     <Tab.Panel>
                       {/* Preferences Panel Content */}
                       <div className="space-y-8">
-                        {/* Theme Settings */}
-                        <div className="bg-white overflow-hidden shadow sm:rounded-lg">
-                          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-                            <h3 className="text-lg font-medium leading-6 text-gray-900 flex items-center">
-                              <PaintBrushIcon className="h-5 w-5 mr-2 text-gray-500" />
-                              Theme Settings
-                            </h3>
-                            <p className="mt-1 max-w-2xl text-sm text-gray-500">Customize the appearance of the application</p>
-                          </div>
-                          
-                          <div className="px-4 py-5 sm:p-6">
-                            <div className="space-y-6">
-                              {/* Theme Selector */}
-                              <div>
-                                <Listbox value={selectedTheme} onChange={handleThemeChange}>
-                                  {({ open }) => (
-                                    <div className="contents">
-                                      <Listbox.Label className="block text-sm font-medium text-gray-700">Theme</Listbox.Label>
-                                      <div className="mt-1 relative">
-                                        <Listbox.Button className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                          <div className="flex items-center">
-                                            <selectedTheme.icon className="flex-shrink-0 h-5 w-5 text-gray-500" aria-hidden="true" />
-                                            <span className="ml-3 block truncate">{selectedTheme.name}</span>
-                                          </div>
-                                          <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                                          </span>
-                                        </Listbox.Button>
-
-                                        <Transition
-                                          show={open}
-                                          as="div"
-                                          leave="transition ease-in duration-100"
-                                          leaveFrom="opacity-100"
-                                          leaveTo="opacity-0"
-                                        >
-                                          <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                                            {themeOptions.map((theme) => (
-                                              <Listbox.Option
-                                                key={theme.id}
-                                                className={({ active }) =>
-                                                  `${active ? 'text-white bg-blue-600' : 'text-gray-900'}
-                                                    relative cursor-default select-none py-2 pl-3 pr-9`
-                                                }
-                                                value={theme}
-                                              >
-                                                {({ selected, active }) => (
-                                                  <div className="contents">
-                                                    <div className="flex items-center">
-                                                      <theme.icon
-                                                        className={`${active ? 'text-white' : 'text-gray-500'} h-5 w-5 flex-shrink-0`}
-                                                        aria-hidden="true"
-                                                      />
-                                                      <span className={`${selected ? 'font-semibold' : 'font-normal'} ml-3 block truncate`}>
-                                                        {theme.name}
-                                                      </span>
-                                                      <span className="ml-2 text-gray-500 text-xs">{theme.description}</span>
-                                                    </div>
-
-                                                    {selected && (
-                                                      <span
-                                                        className={`${active ? 'text-white' : 'text-blue-600'}
-                                                            absolute inset-y-0 right-0 flex items-center pr-4`}
-                                                      >
-                                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                )}
-                                              </Listbox.Option>
-                                            ))}
-                                          </Listbox.Options>
-                                        </Transition>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Listbox>
-                                
-                                <div className="mt-4">
-                                  <p className="text-sm font-medium text-gray-700 mb-2">Preview</p>
-                                  <div className="grid grid-cols-3 gap-3">
-                                    <div className={`rounded-md border ${selectedTheme.id === 'light' ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'} overflow-hidden shadow-sm`}>
-                                      <div className="h-16 bg-white"></div>
-                                      <div className="p-2 bg-gray-50 text-xs text-center text-gray-700">Light</div>
-                                    </div>
-                                    
-                                    <div className={`rounded-md border ${selectedTheme.id === 'dark' ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'} overflow-hidden shadow-sm`}>
-                                      <div className="h-16 bg-gray-900"></div>
-                                      <div className="p-2 bg-gray-800 text-xs text-center text-gray-200">Dark</div>
-                                    </div>
-                                    
-                                    <div className={`rounded-md border ${selectedTheme.id === 'system' ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'} overflow-hidden shadow-sm`}>
-                                      <div className="h-16 bg-gradient-to-r from-white to-gray-900"></div>
-                                      <div className="p-2 bg-gradient-to-r from-gray-50 to-gray-800 text-xs text-center text-gray-700">System</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Accessibility Settings */}
-                              <div className="pt-6 border-t border-gray-200">
-                                <h4 className="text-sm font-medium text-gray-900 mb-4">Accessibility</h4>
-                                <div className="space-y-4">
-                                  <div className="flex items-center justify-between">
-                                    <div>
-                                      <p className="text-sm font-medium text-gray-700">Reduced Motion</p>
-                                      <p className="text-xs text-gray-500">Minimize animations throughout the interface</p>
-                                    </div>
-                                    <Switch
-                                      checked={reducedMotion}
-                                      onChange={handleReducedMotionToggle}
-                                      className={`${
-                                        reducedMotion ? 'bg-blue-600' : 'bg-gray-200'
-                                      } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                                    >
-                                      <span className="sr-only">Toggle reduced motion</span>
-                                      <span
-                                        aria-hidden="true"
-                                        className={`${
-                                          reducedMotion ? 'translate-x-5' : 'translate-x-0'
-                                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                                      />
-                                    </Switch>
-                                  </div>
-                                  
-                                  <div className="flex items-center justify-between">
-                                    <div>
-                                      <p className="text-sm font-medium text-gray-700">High Contrast</p>
-                                      <p className="text-xs text-gray-500">Increase contrast for better readability</p>
-                                    </div>
-                                    <Switch
-                                      checked={highContrast}
-                                      onChange={(value) => setHighContrast(value)}
-                                      className={`${
-                                        highContrast ? 'bg-blue-600' : 'bg-gray-200'
-                                      } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                                    >
-                                      <span className="sr-only">Toggle high contrast</span>
-                                      <span
-                                        aria-hidden="true"
-                                        className={`${
-                                          highContrast ? 'translate-x-5' : 'translate-x-0'
-                                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                                      />
-                                    </Switch>
-                                  </div>
-                                  
-                                  <div>
-                                    <label className="text-sm font-medium text-gray-700">Font Size</label>
-                                    <div className="mt-2">
-                                      <div className="flex items-center space-x-2">
-                                        <span className="text-xs text-gray-500">A</span>
-                                        <input
-                                          type="range"
-                                          min="1"
-                                          max="5"
-                                          step="1"
-                                          defaultValue="3"
-                                          className="flex-1 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                                        />
-                                        <span className="text-base font-bold text-gray-500">A</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Localization Settings */}
-                        <div className="bg-white overflow-hidden shadow sm:rounded-lg">
-                          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-                            <h3 className="text-lg font-medium leading-6 text-gray-900 flex items-center">
-                              <GlobeAltIcon className="h-5 w-5 mr-2 text-gray-500" />
-                              Localization
-                            </h3>
-                            <p className="mt-1 max-w-2xl text-sm text-gray-500">Regional and language preferences</p>
-                          </div>
-                          
-                          <div className="px-4 py-5 sm:p-6">
-                            <div className="space-y-6">
-                              {/* Language Selector */}
-                              <div>
-                                <Listbox value={selectedLanguage} onChange={handleLanguageChange}>
-                                  {({ open }) => (
-                                    <div className="contents">
-                                      <Listbox.Label className="block text-sm font-medium text-gray-700">Language</Listbox.Label>
-                                      <div className="mt-1 relative">
-                                        <Listbox.Button className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                          <div className="flex items-center">
-                                            <span className="mr-2">{selectedLanguage.flag}</span>
-                                            <span className="block truncate">{selectedLanguage.name}</span>
-                                            <span className="ml-2 text-gray-500">({selectedLanguage.nativeName})</span>
-                                          </div>
-                                          <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                                          </span>
-                                        </Listbox.Button>
-
-                                        <Transition
-                                          show={open}
-                                          as="div"
-                                          leave="transition ease-in duration-100"
-                                          leaveFrom="opacity-100"
-                                          leaveTo="opacity-0"
-                                        >
-                                          <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                                            {languageOptions.map((language) => (
-                                              <Listbox.Option
-                                                key={language.id}
-                                                className={({ active }) =>
-                                                  `${active ? 'text-white bg-blue-600' : 'text-gray-900'}
-                                                    relative cursor-default select-none py-2 pl-3 pr-9`
-                                                }
-                                                value={language}
-                                              >
-                                                {({ selected, active }) => (
-                                                  <div className="contents">
-                                                    <div className="flex items-center">
-                                                      <span className="mr-2">{language.flag}</span>
-                                                      <span className={`${selected ? 'font-semibold' : 'font-normal'} block truncate`}>
-                                                        {language.name}
-                                                      </span>
-                                                      <span className="ml-2 text-xs text-gray-500">({language.nativeName})</span>
-                                                    </div>
-
-                                                    {selected && (
-                                                      <span
-                                                        className={`${active ? 'text-white' : 'text-blue-600'}
-                                                            absolute inset-y-0 right-0 flex items-center pr-4`}
-                                                      >
-                                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                )}
-                                              </Listbox.Option>
-                                            ))}
-                                          </Listbox.Options>
-                                        </Transition>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Listbox>
-                              </div>
-                              
-                              {/* Currency Selector */}
-                              <div>
-                                <Listbox value={selectedCurrency} onChange={(currency) => setSelectedCurrency(currency)}>
-                                  {({ open }) => (
-                                    <div className="contents">
-                                      <Listbox.Label className="block text-sm font-medium text-gray-700">Currency</Listbox.Label>
-                                      <div className="mt-1 relative">
-                                        <Listbox.Button className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                          <div className="flex items-center">
-                                            <span className="font-medium mr-1">{selectedCurrency.symbol}</span>
-                                            <span className="block truncate">{selectedCurrency.name}</span>
-                                          </div>
-                                          <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                                          </span>
-                                        </Listbox.Button>
-
-                                        <Transition
-                                          show={open}
-                                          as="div"
-                                          leave="transition ease-in duration-100"
-                                          leaveFrom="opacity-100"
-                                          leaveTo="opacity-0"
-                                        >
-                                          <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                                            {currencyOptions.map((currency) => (
-                                              <Listbox.Option
-                                                key={currency.id}
-                                                className={({ active }) =>
-                                                  `${active ? 'text-white bg-blue-600' : 'text-gray-900'}
-                                                    relative cursor-default select-none py-2 pl-3 pr-9`
-                                                }
-                                                value={currency}
-                                              >
-                                                {({ selected, active }) => (
-                                                  <div className="contents">
-                                                    <div className="flex items-center">
-                                                      <span className={`${active ? 'text-white' : 'text-gray-900'} font-medium mr-1`}>
-                                                        {currency.symbol}
-                                                      </span>
-                                                      <span className={`${selected ? 'font-semibold' : 'font-normal'} block truncate`}>
-                                                        {currency.name}
-                                                      </span>
-                                                    </div>
-
-                                                    {selected && (
-                                                      <span
-                                                        className={`${active ? 'text-white' : 'text-blue-600'}
-                                                            absolute inset-y-0 right-0 flex items-center pr-4`}
-                                                      >
-                                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                )}
-                                              </Listbox.Option>
-                                            ))}
-                                          </Listbox.Options>
-                                        </Transition>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Listbox>
-                              </div>
-                              
-                              {/* Timezone Selector */}
-                              <div>
-                                <Listbox value={selectedTimeZone} onChange={(timezone) => setSelectedTimeZone(timezone)}>
-                                  {({ open }) => (
-                                    <div className="contents">
-                                      <Listbox.Label className="block text-sm font-medium text-gray-700">Time Zone</Listbox.Label>
-                                      <div className="mt-1 relative">
-                                        <Listbox.Button className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                          <div className="flex items-center">
-                                            <span className="block truncate">{selectedTimeZone.name}</span>
-                                            <span className="ml-2 text-gray-500 text-xs">{selectedTimeZone.offset}</span>
-                                          </div>
-                                          <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                                            <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                                          </span>
-                                        </Listbox.Button>
-
-                                        <Transition
-                                          show={open}
-                                          as="div"
-                                          leave="transition ease-in duration-100"
-                                          leaveFrom="opacity-100"
-                                          leaveTo="opacity-0"
-                                        >
-                                          <Listbox.Options className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                                            {timeZoneOptions.map((timezone) => (
-                                              <Listbox.Option
-                                                key={timezone.id}
-                                                className={({ active }) =>
-                                                  `${active ? 'text-white bg-blue-600' : 'text-gray-900'}
-                                                    relative cursor-default select-none py-2 pl-3 pr-9`
-                                                }
-                                                value={timezone}
-                                              >
-                                                {({ selected, active }) => (
-                                                  <div className="contents">
-                                                    <div className="flex items-center">
-                                                      <span className={`${selected ? 'font-semibold' : 'font-normal'} block truncate`}>
-                                                        {timezone.name}
-                                                      </span>
-                                                      <span className={`ml-2 text-xs ${active ? 'text-white' : 'text-gray-500'}`}>
-                                                        {timezone.offset}
-                                                      </span>
-                                                    </div>
-
-                                                    {selected && (
-                                                      <span
-                                                        className={`${active ? 'text-white' : 'text-blue-600'}
-                                                            absolute inset-y-0 right-0 flex items-center pr-4`}
-                                                      >
-                                                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                )}
-                                              </Listbox.Option>
-                                            ))}
-                                          </Listbox.Options>
-                                        </Transition>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Listbox>
-                              </div>
-                              
-                              {/* Date Format */}
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700">Date Format</label>
-                                <div className="mt-2">
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div className="flex items-center">
-                                      <input
-                                        id="dateformat-mmddyyyy"
-                                        name="dateformat"
-                                        type="radio"
-                                        checked={dateFormat === "MM/DD/YYYY"}
-                                        onChange={() => setDateFormat("MM/DD/YYYY")}
-                                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                                      />
-                                      <label htmlFor="dateformat-mmddyyyy" className="ml-3">
-                                        <div className="text-sm text-gray-900">MM/DD/YYYY</div>
-                                        <div className="text-xs text-gray-500">Example: 12/31/2023</div>
-                                      </label>
-                                    </div>
-                                    <div className="flex items-center">
-                                      <input
-                                        id="dateformat-ddmmyyyy"
-                                        name="dateformat"
-                                        type="radio"
-                                        checked={dateFormat === "DD/MM/YYYY"}
-                                        onChange={() => setDateFormat("DD/MM/YYYY")}
-                                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                                      />
-                                      <label htmlFor="dateformat-ddmmyyyy" className="ml-3">
-                                        <div className="text-sm text-gray-900">DD/MM/YYYY</div>
-                                        <div className="text-xs text-gray-500">Example: 31/12/2023</div>
-                                      </label>
-                                    </div>
-                                    <div className="flex items-center">
-                                      <input
-                                        id="dateformat-yyyymmdd"
-                                        name="dateformat"
-                                        type="radio"
-                                        checked={dateFormat === "YYYY-MM-DD"}
-                                        onChange={() => setDateFormat("YYYY-MM-DD")}
-                                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                                      />
-                                      <label htmlFor="dateformat-yyyymmdd" className="ml-3">
-                                        <div className="text-sm text-gray-900">YYYY-MM-DD</div>
-                                        <div className="text-xs text-gray-500">Example: 2023-12-31</div>
-                                      </label>
-                                    </div>
-                                    <div className="flex items-center">
-                                      <input
-                                        id="dateformat-longform"
-                                        name="dateformat"
-                                        type="radio"
-                                        checked={dateFormat === "MMMM D, YYYY"}
-                                        onChange={() => setDateFormat("MMMM D, YYYY")}
-                                        className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                                      />
-                                      <label htmlFor="dateformat-longform" className="ml-3">
-                                        <div className="text-sm text-gray-900">Month Day, Year</div>
-                                        <div className="text-xs text-gray-500">Example: December 31, 2023</div>
-                                      </label>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              <div className="mt-6 flex justify-end">
-                                <button
-                                  type="button"
-                                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                  onClick={() => showSuccessMessage("Localization preferences saved successfully!")}
-                                >
-                                  Save Preferences
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                        {/* Content will be added here */}
                       </div>
                     </Tab.Panel>
                   </Tab.Panels>
@@ -2371,10 +1882,10 @@ export default function SettingsPage() {
       </div>
       
       {/* Confirmation Dialog */}
-      <Transition appear show={confirmDialogOpen} as="div">
+      <Transition appear show={confirmDialogOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setConfirmDialogOpen(false)}>
           <Transition.Child
-            as="div"
+            as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-100"
@@ -2388,7 +1899,7 @@ export default function SettingsPage() {
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
-                as="div"
+                as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 scale-95"
                 enterTo="opacity-100 scale-100"
@@ -2431,10 +1942,10 @@ export default function SettingsPage() {
       </Transition>
       
       {/* Delete Account Confirmation Dialog */}
-      <Transition appear show={showDeleteAccountDialog} as="div">
+      <Transition appear show={showDeleteAccountDialog} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setShowDeleteAccountDialog(false)}>
           <Transition.Child
-            as="div"
+            as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-100"
@@ -2448,7 +1959,7 @@ export default function SettingsPage() {
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
-                as="div"
+                as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 scale-95"
                 enterTo="opacity-100 scale-100"

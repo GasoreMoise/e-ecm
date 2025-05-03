@@ -10,6 +10,15 @@ const transporter = nodemailer.createTransport({
   },
 })
 
+// Verify transporter configuration
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('SMTP Configuration Error:', error)
+  } else {
+    console.log('SMTP Server is ready to send emails')
+  }
+})
+
 export async function sendVerificationEmail(email: string, token: string) {
   const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`
 
@@ -20,18 +29,28 @@ export async function sendVerificationEmail(email: string, token: string) {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
       user: process.env.SMTP_USER,
-      // Don't log the password
+      secure: process.env.SMTP_SECURE,
     })
 
     const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM,
+      from: `"Optical Eyewear" <${process.env.SMTP_FROM}>`,
       to: email,
       subject: 'Verify your email address',
       html: `
-        <h1>Welcome to Optical Eyewear!</h1>
-        <p>Please click the link below to verify your email address:</p>
-        <a href="${verificationUrl}">${verificationUrl}</a>
-        <p>If you didn't create an account, you can safely ignore this email.</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #1a1a1a;">Welcome to Optical Eyewear!</h1>
+          <p>Thank you for registering. Please verify your email address by clicking the button below:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" 
+               style="background-color: #3b82f6; color: white; padding: 12px 24px; 
+                      text-decoration: none; border-radius: 5px; display: inline-block;">
+              Verify Email Address
+            </a>
+          </div>
+          <p style="color: #666;">Or copy and paste this link in your browser:</p>
+          <p style="color: #666;">${verificationUrl}</p>
+          <p style="color: #666; margin-top: 30px;">If you didn't create an account, you can safely ignore this email.</p>
+        </div>
       `,
     })
 

@@ -53,6 +53,12 @@ export default function Header() {
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center space-x-4">
           <Link 
+            href="/auth/login" 
+            className="px-6 py-2 rounded-full text-white border border-white/30 hover:bg-white/10 transition-colors"
+          >
+            Login
+          </Link>
+          <Link 
             href="/auth/register" 
             className="px-6 py-2 rounded-full text-gray-900 bg-white/90 hover:bg-white transition-colors"
           >

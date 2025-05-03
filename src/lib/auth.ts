@@ -38,8 +38,25 @@ export async function logout() {
   cookieStore.delete('token')
 }
 
-export async function getSession(req: NextRequest) {
-  const token = req.cookies.get('token')?.value
-  if (!token) return null
-  return await decrypt(token)
+export async function getSession(req: NextRequest | Request) {
+  let token: string | undefined;
+  
+  if (req instanceof NextRequest) {
+    token = req.cookies.get('token')?.value;
+  } else {
+    // Regular Request object
+    const cookieHeader = req.headers.get('cookie');
+    if (cookieHeader) {
+      const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.trim().split('=');
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, string>);
+      
+      token = cookies['token'];
+    }
+  }
+  
+  if (!token) return null;
+  return await decrypt(token);
 } 
