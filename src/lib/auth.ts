@@ -3,7 +3,10 @@ import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
 import { ResponseCookies } from 'next/dist/server/web/spec-extension/cookies'
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
+// Make sure JWT_SECRET is initialized safely - handle missing env variable case
+const JWT_SECRET = process.env.JWT_SECRET 
+  ? new TextEncoder().encode(process.env.JWT_SECRET)
+  : new TextEncoder().encode('fallback-dev-secret-do-not-use-in-production');
 
 export async function encrypt(payload: any) {
   return await new SignJWT(payload)
@@ -23,40 +26,77 @@ export async function decrypt(token: string) {
 }
 
 export async function login(token: string) {
-  const cookieStore = (await cookies()) as ResponseCookies
-  cookieStore.delete('token') // Clear any existing token
-  cookieStore.set('token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 // 24 hours
-  })
+  try {
+    const cookieStore = (await cookies()) as ResponseCookies
+    cookieStore.delete('token') // Clear any existing token
+    cookieStore.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 // 24 hours
+    })
+    return true
+  } catch (error) {
+    console.error('Error setting auth cookie:', error)
+    return false
+  }
 }
 
 export async function logout() {
-  const cookieStore = await cookies()
-  cookieStore.delete('token')
+  try {
+    const cookieStore = await cookies()
+    cookieStore.delete('token')
+    return true
+  } catch (error) {
+    console.error('Error clearing auth cookie:', error)
+    return false
+  }
 }
 
 export async function getSession(req: NextRequest | Request) {
-  let token: string | undefined;
-  
-  if (req instanceof NextRequest) {
-    token = req.cookies.get('token')?.value;
-  } else {
-    // Regular Request object
-    const cookieHeader = req.headers.get('cookie');
-    if (cookieHeader) {
-      const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
-        const [key, value] = cookie.trim().split('=');
-        acc[key] = value;
-        return acc;
-      }, {} as Record<string, string>);
-      
-      token = cookies['token'];
+  try {
+    let token: string | undefined;
+    
+    if (req instanceof NextRequest) {
+      token = req.cookies.get('token')?.value;
+    } else {
+      // Regular Request object
+      const cookieHeader = req.headers.get('cookie');
+      if (cookieHeader) {
+        const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+          const [key, value] = cookie.trim().split('=');
+          acc[key] = value;
+          return acc;
+        }, {} as Record<string, string>);
+        
+        token = cookies['token'];
+      }
+    }
+    
+    if (!token) return null;
+    return await decrypt(token);
+  } catch (error) {
+    console.error('Error getting session:', error)
+    return null
+  }
+}
+
+// Client-side helper to store token in localStorage (fallback when cookies fail)
+export const clientAuth = {
+  saveToken: (token: string) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', token);
+    }
+  },
+  getToken: () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('auth_token');
+    }
+    return null;
+  },
+  clearToken: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
     }
   }
-  
-  if (!token) return null;
-  return await decrypt(token);
-} 
+}; 

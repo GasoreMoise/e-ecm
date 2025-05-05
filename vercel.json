@@ -19,7 +19,23 @@
   "functions": {
     "api/auth/**/*.js": {
       "memory": 1024,
-      "maxDuration": 10
+      "maxDuration": 10,
+      "runtime": "nodejs18.x"
+    },
+    "api/dashboard/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "runtime": "nodejs18.x"
+    },
+    "api/user/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "runtime": "nodejs18.x" 
+    },
+    "api/healthcheck.js": {
+      "memory": 512,
+      "maxDuration": 5,
+      "runtime": "nodejs18.x"
     }
   },
   "crons": [

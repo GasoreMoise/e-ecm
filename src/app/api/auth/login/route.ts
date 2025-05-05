@@ -3,6 +3,7 @@ import { login } from '@/lib/auth'
 import { authenticateUser } from './actions'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs' // Ensure Node.js runtime
 
 export async function POST(request: Request) {
   try {
@@ -49,8 +50,19 @@ export async function POST(request: Request) {
     // Set cookie
     console.log('Setting auth cookie...')
     const startCookieSet = Date.now()
-    await login(authResult.token)
+    const cookieSet = await login(authResult.token)
     console.log('Cookie set in', Date.now() - startCookieSet, 'ms')
+    
+    if (!cookieSet) {
+      // We succeeded with auth but failed to set the cookie
+      // Return the token to the client as a fallback
+      console.log('Warning: Cookie could not be set, using token in response')
+      return NextResponse.json({ 
+        message: 'Login successful but cookie could not be set',
+        userType: authResult.userType,
+        token: authResult.token // Send token in response as fallback
+      })
+    }
 
     console.log('Login successful for user type:', authResult.userType)
     return NextResponse.json({ 
