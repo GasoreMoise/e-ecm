@@ -1,5 +1,5 @@
 [build]
-  command = "./deploy.bat"
+  command = "npm run netlify-build"
   publish = ".next"
 
 [[plugins]]
@@ -19,3 +19,5 @@
   NEXT_SKIP_RENDER = "1"
   SKIP_STATIC_GENERATION = "true"
   DISABLE_ESLINT_PLUGIN = "true"
+  NEXT_PHASE = "build"
+  PRISMA_SKIP_DATABASE_VALIDATION = "true"

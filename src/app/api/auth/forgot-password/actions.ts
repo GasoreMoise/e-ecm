@@ -12,38 +12,52 @@ export async function requestPasswordReset(email: string) {
       return { success: false, error: 'Server configuration error' }
     }
 
-    // Check if user exists
-    const user = await db.user.findUnique({
-      where: { email }
-    })
-
-    if (!user) {
-      // Return success even if user doesn't exist for security
+    // Skip actual database operations during build phase
+    if (process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'build') {
+      console.log('Build phase detected, skipping DB operations for: requestPasswordReset')
       return { 
         success: true, 
         message: 'If an account exists, you will receive a password reset email.' 
       }
     }
 
-    // Generate reset token (1 hour expiry)
-    const resetToken = await encrypt({
-      email,
-      purpose: 'password-reset',
-      exp: Math.floor(Date.now() / 1000) + 60 * 60
-    })
+    try {
+      // Check if user exists
+      const user = await db.user.findUnique({
+        where: { email }
+      })
 
-    // Store reset token
-    await db.user.update({
-      where: { email },
-      data: { resetToken }
-    })
+      if (!user) {
+        // Return success even if user doesn't exist for security
+        return { 
+          success: true, 
+          message: 'If an account exists, you will receive a password reset email.' 
+        }
+      }
 
-    // Send reset email
-    await sendPasswordResetEmail(email, resetToken)
+      // Generate reset token (1 hour expiry)
+      const resetToken = await encrypt({
+        email,
+        purpose: 'password-reset',
+        exp: Math.floor(Date.now() / 1000) + 60 * 60
+      })
 
-    return { 
-      success: true, 
-      message: 'If an account exists, you will receive a password reset email.' 
+      // Store reset token
+      await db.user.update({
+        where: { email },
+        data: { resetToken }
+      })
+
+      // Send reset email
+      await sendPasswordResetEmail(email, resetToken)
+
+      return { 
+        success: true, 
+        message: 'If an account exists, you will receive a password reset email.' 
+      }
+    } catch (dbError) {
+      console.error('Database error during password reset:', dbError)
+      return { success: false, error: 'Database error occurred' }
     }
   } catch (error) {
     console.error('Password reset request error:', error)

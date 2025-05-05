@@ -1,18 +1,30 @@
 @echo off
-echo Building for Netlify deployment...
+echo "🔶 Running deployment script..."
 
-:: Set environment variables to skip static generation
-SET NEXT_SKIP_RENDER=1
-SET SKIP_STATIC_GENERATION=true 
-SET NEXT_DISABLE_ESLINT=true
-SET DISABLE_ESLINT_PLUGIN=true
-SET NODE_ENV=production
+REM 1. Install dependencies
+echo "📦 Installing dependencies..."
+call npm ci --production
 
-:: Run the build command
-call npm run build || exit /b 0
+REM 2. Generate Prisma client
+echo "🔧 Generating Prisma client..."
+call npx prisma generate
 
-:: Create Netlify required files
-echo > .netlify/_redirects "*  /index.html  200"
+REM 3. Set build environment variables
+echo "🔨 Setting build environment variables..."
+set NEXT_PHASE=build
+set NEXT_TELEMETRY_DISABLED=1
+set NODE_ENV=production
+set SKIP_STATIC_GENERATION=true
+set DISABLE_ESLINT_PLUGIN=true
 
-echo Build completed with success status 
+REM 4. Build the application
+echo "🏗️ Building the application..."
+call npm run build
+
+REM 5. Start the application
+echo "🚀 Starting the application..."
+call npm run start
+
+REM Deployment complete
+echo "✅ Deployment complete!"
 

@@ -23,6 +23,20 @@ const nextConfig: NextConfig = {
   
   // External packages to be bundled with server components
   serverExternalPackages: ['@prisma/client', 'nodemailer'],
+  
+  // Prisma workarounds
+  experimental: {
+    // Skip API route collection during build
+    disableOptimizedLoading: true,
+    
+    // Allow Prisma to be properly bundled
+    serverMinification: false,
+  },
+  
+  // Set environment variables specifically for the build phase
+  env: {
+    NEXT_PHASE: process.env.NEXT_PHASE || 'unknown'
+  }
 };
 
 export default nextConfig;

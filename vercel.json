@@ -1,0 +1,19 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run prisma:generate && next build",
+  "outputDirectory": ".next",
+  "regions": ["fra1"],
+  "env": {
+    "NEXT_PHASE": "build",
+    "PRISMA_SKIP_DATABASE_VALIDATION": "true"
+  },
+  "build": {
+    "env": {
+      "NEXT_PHASE": "build",
+      "PRISMA_SKIP_DATABASE_VALIDATION": "true",
+      "NEXT_TELEMETRY_DISABLED": "1",
+      "SKIP_STATIC_GENERATION": "true",
+      "DISABLE_ESLINT_PLUGIN": "true"
+    }
+  }
+} 
