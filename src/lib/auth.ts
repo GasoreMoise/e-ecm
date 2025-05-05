@@ -1,7 +1,5 @@
 import { jwtVerify, SignJWT } from 'jose'
-import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
-import { ResponseCookies } from 'next/dist/server/web/spec-extension/cookies'
 
 // Make sure JWT_SECRET is initialized safely - handle missing env variable case
 const JWT_SECRET = process.env.JWT_SECRET 
@@ -25,35 +23,8 @@ export async function decrypt(token: string) {
   }
 }
 
-export async function login(token: string) {
-  try {
-    const cookieStore = (await cookies()) as ResponseCookies
-    cookieStore.delete('token') // Clear any existing token
-    cookieStore.set('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 // 24 hours
-    })
-    return true
-  } catch (error) {
-    console.error('Error setting auth cookie:', error)
-    return false
-  }
-}
-
-export async function logout() {
-  try {
-    const cookieStore = await cookies()
-    cookieStore.delete('token')
-    return true
-  } catch (error) {
-    console.error('Error clearing auth cookie:', error)
-    return false
-  }
-}
-
-export async function getSession(req: NextRequest | Request) {
+// Extract token from request
+export function getTokenFromRequest(req: NextRequest | Request): string | null {
   try {
     let token: string | undefined;
     
@@ -73,15 +44,21 @@ export async function getSession(req: NextRequest | Request) {
       }
     }
     
-    if (!token) return null;
-    return await decrypt(token);
+    return token || null;
   } catch (error) {
-    console.error('Error getting session:', error)
+    console.error('Error extracting token:', error)
     return null
   }
 }
 
-// Client-side helper to store token in localStorage (fallback when cookies fail)
+// Get session from request
+export async function getSession(req: NextRequest | Request) {
+  const token = getTokenFromRequest(req);
+  if (!token) return null;
+  return await decrypt(token);
+}
+
+// Client-side auth helper
 export const clientAuth = {
   saveToken: (token: string) => {
     if (typeof window !== 'undefined') {
@@ -98,5 +75,11 @@ export const clientAuth = {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
     }
+  },
+  isAuthenticated: () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('auth_token') !== null;
+    }
+    return false;
   }
 }; 

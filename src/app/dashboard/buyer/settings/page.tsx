@@ -814,16 +814,22 @@ export default function SettingsPage() {
   // Handle logout
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/auth/logout', {
+      // Call the logout API endpoint
+      await fetch('/api/auth/logout', {
         method: 'POST',
-        credentials: 'include',
       });
-
-      if (response.ok) {
-        router.push('/auth/login');
+      
+      // Clear the token from localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
       }
+      
+      // Redirect to login page
+      router.push('/auth/login');
     } catch (error) {
       console.error('Logout error:', error);
+      // Still attempt to redirect on error
+      router.push('/auth/login');
     }
   };
   

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
+import { clientAuth } from '@/lib/auth'
 
 export default function Login() {
   const router = useRouter()
@@ -29,6 +30,12 @@ export default function Login() {
       const data = await response.json()
 
       if (response.ok) {
+        // Store the JWT token
+        if (data.token) {
+          console.log('Storing authentication token')
+          clientAuth.saveToken(data.token)
+        }
+        
         // Redirect based on user type
         if (data.userType === 'BUYER') {
           router.push('/dashboard/buyer')
