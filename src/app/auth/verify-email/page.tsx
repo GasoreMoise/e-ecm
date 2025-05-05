@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Button from "@/components/Button";
-import Link from "next/link";
 
-export default function VerifyEmailPage() {
+// Component that uses searchParams
+function VerificationContent() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
   const searchParams = useSearchParams();
@@ -45,33 +45,56 @@ export default function VerifyEmailPage() {
   }, [searchParams]);
   
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 text-center">
-        <h1 className="text-2xl font-bold">Email Verification</h1>
-        
-        {status === "loading" && (
-          <div>
-            <p>Verifying your email...</p>
-            <div className="mt-4 flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-            </div>
+    <div className="w-full max-w-md space-y-8 text-center">
+      <h1 className="text-2xl font-bold">Email Verification</h1>
+      
+      {status === "loading" && (
+        <div>
+          <p>Verifying your email...</p>
+          <div className="mt-4 flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
-        )}
-        
-        {status === "success" && (
-          <div>
-            <p className="text-green-600 mb-4">{message}</p>
-            <Button href="/auth/login">Go to Login</Button>
-          </div>
-        )}
-        
-        {status === "error" && (
-          <div>
-            <p className="text-red-600 mb-4">{message}</p>
-            <Button href="/auth/login">Go to Login</Button>
-          </div>
-        )}
+        </div>
+      )}
+      
+      {status === "success" && (
+        <div>
+          <p className="text-green-600 mb-4">{message}</p>
+          <Button href="/auth/login">Go to Login</Button>
+        </div>
+      )}
+      
+      {status === "error" && (
+        <div>
+          <p className="text-red-600 mb-4">{message}</p>
+          <Button href="/auth/login">Go to Login</Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Loading fallback
+function LoadingFallback() {
+  return (
+    <div className="w-full max-w-md space-y-8 text-center">
+      <h1 className="text-2xl font-bold">Email Verification</h1>
+      <div>
+        <p>Loading verification page...</p>
+        <div className="mt-4 flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <Suspense fallback={<LoadingFallback />}>
+        <VerificationContent />
+      </Suspense>
     </div>
   );
 } 

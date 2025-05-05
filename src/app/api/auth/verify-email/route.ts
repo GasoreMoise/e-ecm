@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
     // Verify token
     const payload = await decrypt(token)
-    if (!payload || !payload.email) {
+    if (!payload || !payload.email || typeof payload.email !== 'string') {
       return NextResponse.json(
         { error: 'Invalid verification token' },
         { status: 400 }

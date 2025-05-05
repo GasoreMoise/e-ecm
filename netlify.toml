@@ -1,6 +1,6 @@
 [build]
-  command = "npm run build"
-  publish = "out"
+  command = "./deploy.bat"
+  publish = ".next"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -10,3 +10,12 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Environment variables
+[build.environment]
+  NEXT_PUBLIC_SITE_URL = "https://optical-eyewear.netlify.app"
+  NEXT_DISABLE_ESLINT = "true"
+  NODE_ENV = "production"
+  NEXT_SKIP_RENDER = "1"
+  SKIP_STATIC_GENERATION = "true"
+  DISABLE_ESLINT_PLUGIN = "true"

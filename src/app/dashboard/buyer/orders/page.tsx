@@ -1,49 +1,33 @@
 'use client'
-import { useState, useEffect, Fragment, useCallback } from 'react'
-import { Dialog, Transition, Listbox, Tab, Disclosure } from '@headlessui/react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { format, parseISO, isAfter, isBefore, isEqual } from 'date-fns'
 import {
   ShoppingBagIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
   ChevronDownIcon,
-  XMarkIcon,
   CheckIcon,
-  AdjustmentsHorizontalIcon,
   ArrowDownTrayIcon,
   DocumentDuplicateIcon,
   EyeIcon,
   TruckIcon,
   ClockIcon,
   PaperAirplaneIcon,
-  TagIcon,
   CreditCardIcon,
   CheckCircleIcon,
   XCircleIcon,
   ExclamationCircleIcon,
-  ChevronUpDownIcon,
   EnvelopeIcon,
   PhoneIcon,
   UserIcon,
-  MapPinIcon,
   BuildingStorefrontIcon,
-  QuestionMarkCircleIcon,
-  ChatBubbleLeftRightIcon,
   ArrowPathIcon,
-  ChevronUpIcon,
-  ChevronRightIcon,
   PlusIcon,
   PrinterIcon,
-  CalculatorIcon,
   ArrowLeftIcon,
   ArrowUturnLeftIcon,
-  StarIcon,
-  CalendarIcon,
-  BanknotesIcon,
   ClipboardDocumentCheckIcon,
-  InformationCircleIcon
 } from '@heroicons/react/24/outline'
 
 // Define types
@@ -195,26 +179,6 @@ interface FilterOptions {
   paymentStatus: 'all' | 'pending' | 'paid' | 'failed' | 'refunded'
   sortBy: 'date_desc' | 'date_asc' | 'total_desc' | 'total_asc'
 }
-
-const mockOrders: Order[] = [
-  {
-    id: 'ORD-001',
-    product: 'Premium Eyewear Lens',
-    supplier: 'OptiCraft Solutions',
-    date: '2024-01-15',
-    status: 'delivered',
-    total: 299.99
-  },
-  {
-    id: 'ORD-002',
-    product: 'Designer Frames Bundle',
-    supplier: 'VisionPro International',
-    date: '2024-01-18',
-    status: 'processing',
-    total: 549.99
-  },
-  // Add more mock orders as needed
-]
 
 // Mock data for orders
 const generateMockOrders = (): Order[] => {
@@ -723,7 +687,6 @@ export default function Orders() {
   const [filterMenuOpen, setFilterMenuOpen] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isDetailView, setIsDetailView] = useState(false)
-  const router = useRouter()
   
   // Filter and sort options
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -738,7 +701,7 @@ export default function Orders() {
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [itemsPerPage] = useState(10)
   
   // Load orders
   useEffect(() => {
@@ -869,14 +832,15 @@ export default function Orders() {
       refunded: 'bg-pink-100 text-pink-800',
       partially_refunded: 'bg-orange-100 text-orange-800'
     }
-    return styles[status] || 'bg-gray-100 text-gray-800'
+    return styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800'
   }
   
   // Format date
   const formatDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'MMM d, yyyy h:mm a')
-    } catch (e) {
+    } catch {
+      // Ignore error and return original string
       return dateString
     }
   }
@@ -1215,7 +1179,7 @@ export default function Orders() {
                         (() => {
                           try {
                             return format(parseISO(selectedOrder.customer.customerSince), 'MMM yyyy')
-                          } catch (e) {
+                          } catch {
                             return selectedOrder.customer.customerSince
                           }
                         })()
