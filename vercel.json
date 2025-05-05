@@ -15,5 +15,17 @@
       "SKIP_STATIC_GENERATION": "true",
       "DISABLE_ESLINT_PLUGIN": "true"
     }
-  }
+  },
+  "functions": {
+    "api/auth/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/healthcheck",
+      "schedule": "0 */6 * * *"
+    }
+  ]
 } 
