@@ -10,14 +10,16 @@ const transporter = nodemailer.createTransport({
   },
 })
 
-// Verify transporter configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('SMTP Configuration Error:', error)
-  } else {
-    console.log('SMTP Server is ready to send emails')
-  }
-})
+// Only verify in development, not during builds
+if (process.env.NODE_ENV === 'development') {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error('SMTP Configuration Error:', error)
+    } else {
+      console.log('SMTP Server is ready to send emails')
+    }
+  })
+}
 
 export async function sendVerificationEmail(email: string, token: string) {
   const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`

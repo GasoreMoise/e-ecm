@@ -18,17 +18,11 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // Disable page data collection to skip static pre-rendering issues
-  experimental: {
-    // Disable static page generation (for pages that need client-side data)
-    disableOptimizedLoading: true,
-    optimizeCss: false,
-    workerThreads: false,
-    cpus: 1
-  },
-  
   // Configure outputs
-  output: 'standalone'
+  output: 'standalone',
+  
+  // External packages to be bundled with server components
+  serverExternalPackages: ['@prisma/client', 'nodemailer'],
 };
 
 export default nextConfig;
