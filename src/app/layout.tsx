@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "E-ECM",
-  description: "Electronic Enterprise Content Management",
+  description: "B2B E-Commerce Management System",
   icons: {
     icon: "/logo.jpg",
   },
