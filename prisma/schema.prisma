@@ -51,4 +51,70 @@ model User {
   manufacturingLocations String?
   annualRevenue     String?
   position          String?
+  
+  // Relations
+  orders           Order[]
+  financialAccount FinancialAccount?
+  notifications    Notification[]
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  COMPLETED
+  CANCELED
+  REFUNDED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  status          OrderStatus @default(PENDING)
+  totalAmount     Float
+  paymentStatus   String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relations
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  
+  // Optional tracking information
+  trackingNumber  String?
+  shippingMethod  String?
+  deliveryAddress String?
+}
+
+model FinancialAccount {
+  id                  String   @id @default(cuid())
+  outstandingPayments Float    @default(0)
+  creditBalance       Float    @default(0)
+  lastTransactionDate DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  // Relations
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id])
+}
+
+enum NotificationType {
+  ORDER
+  PAYMENT
+  OFFER
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  
+  // Relations
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
 } 

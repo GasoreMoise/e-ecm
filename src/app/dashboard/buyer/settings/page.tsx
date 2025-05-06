@@ -375,8 +375,22 @@ export default function SettingsPage() {
     accountStatus: 'Active'
   })
 
-  // Fetch user data on component mount
+  // Check authentication and load user data on component mount
   useEffect(() => {
+    async function checkAuth() {
+      // Verify user is authenticated
+      const isAuthenticated = await clientAuth.verifyAuth();
+      
+      if (!isAuthenticated) {
+        console.log('User not authenticated, redirecting to login');
+        router.push('/auth/login');
+        return;
+      }
+      
+      // If authenticated, fetch user data
+      fetchUserData();
+    }
+    
     async function fetchUserData() {
       try {
         console.log('Fetching user profile data...');
@@ -389,7 +403,12 @@ export default function SettingsPage() {
           return;
         }
         
-        const response = await fetch('/api/user/profile', {
+        // Determine if we should use mock endpoints in development
+        const isDevelopment = process.env.NODE_ENV === 'development';
+        const profileEndpoint = isDevelopment ? '/api/user/mock-profile' : '/api/user/profile';
+        console.log(`Using ${isDevelopment ? 'mock' : 'real'} profile endpoint:`, profileEndpoint);
+        
+        const response = await fetch(profileEndpoint, {
           credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -419,13 +438,13 @@ export default function SettingsPage() {
           phone: data.phone || '',
           type: data.type || 'BUYER',
           profileImage: data.profileImage || '/default-avatar.png',
-          verified: data.verified || false,
+          verified: data.emailVerified || false,
           createdAt: data.createdAt || new Date().toISOString(),
           country: data.country || '',
           address: data.address || '',
           city: data.city || '',
           state: data.state || '',
-          zipCode: data.zipCode || ''
+          zipCode: data.postalCode || ''
         });
         
         setProfileImageUrl(data.profileImage || '/default-avatar.png');
@@ -439,7 +458,7 @@ export default function SettingsPage() {
           address: data.address || '',
           city: data.city || '',
           state: data.state || '',
-          zipCode: data.zipCode || ''
+          zipCode: data.postalCode || ''
         });
         
         setLoading(false);
@@ -483,7 +502,8 @@ export default function SettingsPage() {
       }
     }
     
-    fetchUserData();
+    // Start the auth check process
+    checkAuth();
     
     // Load preferences from localStorage if available
     const storedTheme = localStorage.getItem('theme');

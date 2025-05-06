@@ -130,10 +130,14 @@ export default function BuyerDashboard() {
         // Get token from localStorage
         const token = clientAuth.getToken();
         
+        console.log('Sending dashboard request with token:', token ? 'Token present' : 'No token');
+        
         const response = await fetch('/api/dashboard/buyer', {
+          method: 'GET',
           credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token || ''}`,
+            'Content-Type': 'application/json'
           }
         })
         

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Layout from '@/components/Layout'
@@ -14,6 +14,12 @@ export default function Login() {
   })
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
+  const [isDevelopment, setIsDevelopment] = useState(false)
+
+  // Check if we're in development mode
+  useEffect(() => {
+    setIsDevelopment(process.env.NODE_ENV === 'development');
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,7 +27,11 @@ export default function Login() {
     setErrorMessage('')
 
     try {
-      const response = await fetch('/api/auth/login', {
+      // Determine which endpoint to use based on environment
+      const loginEndpoint = isDevelopment ? '/api/auth/mock-login' : '/api/auth/login';
+      console.log(`Using ${isDevelopment ? 'mock' : 'real'} login endpoint:`, loginEndpoint);
+
+      const response = await fetch(loginEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -49,6 +59,7 @@ export default function Login() {
         setErrorMessage(data.error || 'Login failed')
       }
     } catch (error) {
+      console.error('Login error:', error);
       setStatus('error')
       setErrorMessage('An error occurred. Please try again.')
     }
@@ -65,6 +76,11 @@ export default function Login() {
               <p className="text-gray-400">
                 Sign in to your account to continue
               </p>
+              {isDevelopment && (
+                <div className="mt-2 py-1 px-2 bg-purple-900/50 rounded text-purple-300 text-xs">
+                  Development Mode: Mock authentication enabled
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -89,6 +105,7 @@ export default function Login() {
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/20"
                   required
                   disabled={status === 'loading'}
+                  placeholder={isDevelopment ? "Any email works in dev mode" : ""}
                 />
               </div>
 
@@ -107,6 +124,7 @@ export default function Login() {
                   className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/20"
                   required
                   disabled={status === 'loading'}
+                  placeholder={isDevelopment ? "Any password works in dev mode" : ""}
                 />
               </div>
 

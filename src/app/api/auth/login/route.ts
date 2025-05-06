@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server'
 import { authenticateUser } from './actions'
 
 // Skip runtime edge because it causes cookie issues
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
+export const config = {
+  runtime: 'nodejs',
+  regions: ['fra1'],
+  dynamic: 'force-dynamic'
+};
 
 // Simple JWT handling without cookie dependencies
 export async function POST(request: Request) {
