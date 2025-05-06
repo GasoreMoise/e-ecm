@@ -45,6 +45,7 @@ import {
   InformationCircleIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline'
+import { clientAuth } from '@/lib/auth'
 
 interface UserData {
   firstName: string;
@@ -379,8 +380,20 @@ export default function SettingsPage() {
     async function fetchUserData() {
       try {
         console.log('Fetching user profile data...');
+        // Get token from localStorage
+        const token = clientAuth.getToken();
+        
+        if (!token) {
+          console.log('No auth token found, redirecting to login');
+          router.push('/auth/login');
+          return;
+        }
+        
         const response = await fetch('/api/user/profile', {
           credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         })
         
         if (!response.ok) {
@@ -629,10 +642,18 @@ export default function SettingsPage() {
     setSuccessMessage('');
     
     try {
+      // Get token from localStorage
+      const token = clientAuth.getToken();
+      
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+      
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         credentials: 'include',
         body: JSON.stringify(accountForm)
@@ -676,10 +697,18 @@ export default function SettingsPage() {
     setSaveLoading(true);
     
     try {
+      // Get token from localStorage
+      const token = clientAuth.getToken();
+      
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+      
       const response = await fetch('/api/user/password', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -814,15 +843,20 @@ export default function SettingsPage() {
   // Handle logout
   const handleLogout = async () => {
     try {
+      // Get token from localStorage
+      const token = clientAuth.getToken();
+      
       // Call the logout API endpoint
       await fetch('/api/auth/logout', {
         method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       // Clear the token from localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
-      }
+      clientAuth.clearToken();
       
       // Redirect to login page
       router.push('/auth/login');

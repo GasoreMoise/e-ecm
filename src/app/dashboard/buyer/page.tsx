@@ -15,6 +15,7 @@ import {
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import { clientAuth } from '@/lib/auth'
 
 // Define types for our data
 interface Notification {
@@ -83,8 +84,20 @@ export default function BuyerDashboard() {
     async function fetchUserData() {
       try {
         console.log('Fetching user profile data...');
+        // Get token from localStorage
+        const token = clientAuth.getToken();
+        
+        if (!token) {
+          console.log('No auth token found, redirecting to login');
+          router.push('/auth/login');
+          return;
+        }
+        
         const response = await fetch('/api/user/profile', {
           credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         })
         
         if (!response.ok) {
@@ -114,8 +127,14 @@ export default function BuyerDashboard() {
     
     async function fetchDashboardData() {
       try {
+        // Get token from localStorage
+        const token = clientAuth.getToken();
+        
         const response = await fetch('/api/dashboard/buyer', {
           credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         })
         
         if (!response.ok) {
@@ -163,12 +182,19 @@ export default function BuyerDashboard() {
 
   const handleLogout = async () => {
     try {
+      const token = clientAuth.getToken();
+      
       const response = await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       })
 
       if (response.ok) {
+        // Clear token from localStorage
+        clientAuth.clearToken();
         router.push('/auth/login')
       }
     } catch (error) {

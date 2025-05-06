@@ -28,6 +28,14 @@ export function getTokenFromRequest(req: NextRequest | Request): string | null {
   try {
     let token: string | undefined;
     
+    // First check Authorization header for Bearer token
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7); // Remove "Bearer " prefix
+      return token;
+    }
+    
+    // If no Authorization header, fall back to cookies
     if (req instanceof NextRequest) {
       token = req.cookies.get('token')?.value;
     } else {
